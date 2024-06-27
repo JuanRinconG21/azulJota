@@ -1,0 +1,122 @@
+import React, { useState } from "react";
+import Swal2 from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import HelperForm from "../../helper/HelperForm";
+import "../../assets/style.css";
+
+const MySwal = withReactContent(Swal2);
+
+const RegistroUser = () => {
+  const { form, cambiar } = HelperForm({});
+  const Registrar = async (e) => {
+    e.preventDefault();
+    let formulario = form;
+    const request = await fetch("http://localhost:3600/usuarios/agregar", {
+      method: "POST",
+      body: JSON.stringify(formulario),
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await request.json();
+    console.log(data);
+    if (data.id == 200) {
+      let mensaje = data.mensaje;
+      MySwal.fire({
+        title: <strong> {"Felicidades"} </strong>,
+        html: <i>{mensaje}</i>,
+        icon: "success",
+      });
+      setTimeout(() => {
+        window.location = "./";
+      }, 500);
+    } else {
+      let mensaje = data.mensaje;
+      MySwal.fire({
+        title: <strong> {"Error"}</strong>,
+        html: <i>{mensaje}</i>,
+        icon: "error",
+      });
+    }
+  };
+  return (
+    <>
+      <form action="#" className="signup" onSubmit={Registrar}>
+        <div className="field">
+          <input
+            type="text"
+            placeholder="Usuario"
+            required
+            id="USU_USUARIO"
+            name="USU_USUARIO"
+            onChange={cambiar}
+          />
+        </div>
+        <div className="field">
+          <input
+            type="number"
+            placeholder="Nit Empresa"
+            required
+            id="EMPRESA_ID"
+            name="EMPRESA_ID"
+            onChange={cambiar}
+          />
+        </div>
+        <div className="field">
+          <input
+            type="text"
+            placeholder="Nombre"
+            required
+            id="USU_NOMBRE"
+            name="USU_NOMBRE"
+            onChange={cambiar}
+          />
+        </div>
+        <div className="field">
+          <input
+            type="text"
+            placeholder="Apellido"
+            required
+            id="USU_APELLIDO"
+            name="USU_APELLIDO"
+            onChange={cambiar}
+          />
+        </div>
+        <div className="field">
+          <input
+            type="number"
+            placeholder="Telefono"
+            required
+            id="USU_TELEFONO"
+            name="USU_TELEFONO"
+            onChange={cambiar}
+          />
+        </div>
+        <div className="field">
+          <input
+            type="email"
+            placeholder="Correo"
+            required
+            id="USU_EMAIL"
+            name="USU_EMAIL"
+            onChange={cambiar}
+          />
+        </div>
+        <div className="field">
+          <input
+            type="password"
+            placeholder="Contraseña"
+            required
+            id="USU_PASS"
+            name="USU_PASS"
+            onChange={cambiar}
+          />
+        </div>
+        <div className="field btn">
+          <div className="btn-layer"></div>
+          <input type="submit" value="Registrar" />
+        </div>
+      </form>
+    </>
+  );
+};
+
+export default RegistroUser;
