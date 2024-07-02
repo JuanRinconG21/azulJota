@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import HelperForm from "../../helper/HelperForm";
 import Swal2 from "sweetalert2";
@@ -22,6 +22,21 @@ const EditarUser = ({
 }) => {
   const { form, cambiar } = HelperForm({});
   const token = localStorage.getItem("token");
+  const [pass, setPass] = useState("");
+  const Pass = async (id) => {
+    const request = await fetch(
+      `http://localhost:3600/usuarios/desencriptarPass/${id}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `${token}`,
+        },
+      }
+    );
+    const data = await request.json();
+    console.log("LA PASSSSSS", data.mensaje);
+    setPass(data.mensaje);
+  };
 
   const EditarEmple = async (e) => {
     const usuario = document.querySelector("#USU_USUARIO");
@@ -33,14 +48,17 @@ const EditarUser = ({
     const pass = document.querySelector("#USU_PASS");
     e.preventDefault();
     let formulario = form;
-    const request = await fetch(`http://localhost:3600/usuarios/editar/${idUsuario}`, {
-      method: "PUT",
-      body: JSON.stringify(formulario),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `${token}`,
-      },
-    });
+    const request = await fetch(
+      `http://localhost:3600/usuarios/editar/${idUsuario}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(formulario),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${token}`,
+        },
+      }
+    );
     const data = await request.json();
     if (data.id == 200) {
       let mensaje = data.mensaje;
@@ -67,6 +85,9 @@ const EditarUser = ({
       nit.value = "";
     }
   };
+  useEffect(() => {
+    Pass(idUsuario);
+  }, []);
 
   return (
     <>
@@ -84,8 +105,7 @@ const EditarUser = ({
         </Modal.Header>
         <form onSubmit={EditarEmple}>
           <Modal.Body>
-          
-          <div className="mb-2">
+            <div className="mb-2">
               <label className="form-label">Usuario</label>
               <input
                 type="text"
@@ -96,7 +116,7 @@ const EditarUser = ({
                 defaultValue={usuario}
               />
             </div>
-          <div className="mb-2">
+            <div className="mb-2">
               <label className="form-label">Nit Empresa</label>
               <input
                 type="number"
@@ -159,6 +179,7 @@ const EditarUser = ({
                 className="form-control border-secondary"
                 id="USU_PASS"
                 name="USU_PASS"
+                value={pass}
                 onChange={cambiar}
                 required
               />

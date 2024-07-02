@@ -3,7 +3,24 @@ const { QueryTypes } = require("sequelize");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
-
+//ENCRIPTAR Y DESENCRIPTAR CONTRA
+const crypto = require("crypto");
+//LLAVE PARA DESENCRIPTAR
+let llave = "1a3ba3357ddddd0dab0e79875da565c66514d9c5ef5a8416c8e9712bc6b714f6";
+//FUNCION DESENCRIPTAR
+function decryptPassword(encryptedPassword, key) {
+  const parts = encryptedPassword.split(":");
+  const iv = Buffer.from(parts[0], "hex");
+  const encryptedText = Buffer.from(parts[1], "hex");
+  const decipher = crypto.createDecipheriv(
+    "aes-256-cbc",
+    Buffer.from(key, "hex"),
+    iv
+  );
+  let decrypted = decipher.update(encryptedText, "hex", "utf8");
+  decrypted += decipher.final("utf8");
+  return decrypted;
+}
 /* const AgregarUsuario = async (req, res) => {
   try {
     let datos = req.body;
@@ -168,7 +185,7 @@ const login = async (req, res) => {
             USU_EMAIL: dataUsers[0].USU_EMAIL,
             EMP_TERCERO: dataEmpresa[0].EMP_TERCERO,
             EMP_RAZON_SOCIAL: dataEmpresa[0].EMP_RAZON_SOCIAL,
-            USU_IMAGEN: dataUsers[0].USU_IMAGEN
+            USU_IMAGEN: dataUsers[0].USU_IMAGEN,
           },
           "Mafe&Angie",
           {
@@ -188,7 +205,7 @@ const login = async (req, res) => {
             EMP_TERCERO: dataEmpresa[0].EMP_TERCERO,
             EMP_RAZON_SOCIAL: dataEmpresa[0].EMP_RAZON_SOCIAL,
             USU_ROL: dataUsers[0].USU_ROL,
-            USU_IMAGEN: dataUsers[0].USU_IMAGEN
+            USU_IMAGEN: dataUsers[0].USU_IMAGEN,
           },
           token: token,
         });
@@ -336,6 +353,42 @@ const ActualizarPass = async (req, res) => {
   }
 };
 
+const ActivarUsuario = async (req, res) => {
+  try {
+    const Activar = await sequelize.query(
+      `UPDATE public."USUARIO" SET "USU_ESTADO"= true WHERE "USUARIO_ID"  = '${req.params.id}'`,
+      { type: QueryTypes.SELECT }
+    );
+    res.send({ id: 200, mensaje: "Usuario Activado Correctamente" });
+  } catch (error) {
+    res.send({ id: 400, mensaje: error.message });
+  }
+};
+const DesactivarUsuario = async (req, res) => {
+  try {
+    const Desactivar = await sequelize.query(
+      `UPDATE public."USUARIO" SET "USU_ESTADO"= false WHERE "USUARIO_ID"  = '${req.params.id}'`,
+      { type: QueryTypes.SELECT }
+    );
+    res.send({ id: 200, mensaje: "Usuario Desactivado Correctamente" });
+  } catch (error) {
+    res.send({ id: 400, mensaje: error.message });
+  }
+};
+
+const DesencriptarContra = async (req, res) => {
+  try {
+    const Pass = await sequelize.query(
+      `SELECT "USU_PASSDES"
+      FROM public."USUARIO" WHERE "USUARIO_ID" =${req.params.id};`,
+      { type: QueryTypes.SELECT }
+    );
+    let contraDesencriptada = decryptPassword(Pass[0].USU_PASSDES, llave);
+    res.send({ id: 200, mensaje: contraDesencriptada });
+  } catch (error) {
+    res.send({ id: 400, mensaje: error.message });
+  }
+};
 module.exports = {
   EditarUsuario,
   EliminarUsuario,
@@ -346,4 +399,7 @@ module.exports = {
   ListarXCorreo,
   verificarCodigo,
   ActualizarPass,
+  ActivarUsuario,
+  DesactivarUsuario,
+  DesencriptarContra,
 };

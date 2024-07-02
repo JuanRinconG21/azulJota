@@ -123,7 +123,37 @@ const Administrador = (props) => {
     });
     const data = await request.json();
     setEmpresas(data.mensaje);
-    console.log("LA DATA EMPRESAS", data.mensaje);
+  };
+
+  const ActivarUsuario = async (id) => {
+    const request = await fetch(
+      `http://localhost:3600/usuarios/activarUser/${id}`,
+      {
+        method: "PUT",
+      }
+    );
+    const data = await request.json();
+    alert(data.mensaje);
+  };
+
+  const DesactivarUsuario = async (id) => {
+    const request = await fetch(
+      `http://localhost:3600/usuarios/desactivarUser/${id}`,
+      {
+        method: "PUT",
+      }
+    );
+    const data = await request.json();
+    alert(data.mensaje);
+  };
+
+  const CambiarEstado = async (estado, id) => {
+    if (estado === true) {
+      await DesactivarUsuario(id);
+    } else {
+      await ActivarUsuario(id);
+    }
+    ListarUsuarios();
   };
 
   useEffect(() => {
@@ -183,7 +213,7 @@ const Administrador = (props) => {
   };
 
   const renderEstado = (estado) => {
-    return estado === 1 ? "Inactivo" : "Activo";
+    return estado === false ? "Inactivo" : "Activo";
   };
 
   return (
@@ -339,7 +369,7 @@ const Administrador = (props) => {
                           Selecciona un estado
                         </option>
                         <option value="true">Activo</option>
-                        <option value="False">Inactivo</option>
+                        <option value="false">Inactivo</option>
                       </select>
                       <label htmlFor="floatingInput">Estado</label>
                     </div>{" "}
@@ -460,6 +490,12 @@ const Administrador = (props) => {
                                     <button
                                       className="btn btn-app btn-gradient3"
                                       style={{ backgroundColor: "red" }}
+                                      onClick={() => {
+                                        CambiarEstado(
+                                          usuario.USU_ESTADO,
+                                          usuario.USUARIO_ID
+                                        );
+                                      }}
                                     >
                                       {" "}
                                       <i className="bi bi-dash"></i>
@@ -468,6 +504,12 @@ const Administrador = (props) => {
                                     <button
                                       className="btn btn-app btn-gradient4"
                                       style={{ backgroundColor: "green" }}
+                                      onClick={() => {
+                                        CambiarEstado(
+                                          usuario.USU_ESTADO,
+                                          usuario.USUARIO_ID
+                                        );
+                                      }}
                                     >
                                       {" "}
                                       <i className="bi bi-check"></i>{" "}
